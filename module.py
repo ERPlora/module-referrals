@@ -28,3 +28,16 @@ PERMISSIONS = [
 'referrals.change_referral',
 'referrals.manage_settings',
 ]
+
+ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "manager": [
+        "add_referral",
+        "change_referral",
+        "view_referral",
+    ],
+    "employee": [
+        "add_referral",
+        "view_referral",
+    ],
+}
