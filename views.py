@@ -3,6 +3,8 @@ Referral Program Module Views
 """
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from django.http import HttpResponse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render as django_render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -113,6 +115,7 @@ def referrals_list(request):
     }
 
 @login_required
+@htmx_view('referrals/pages/referral_add.html', 'referrals/partials/referral_add_content.html')
 def referral_add(request):
     hub_id = request.session.get('hub_id')
     if request.method == 'POST':
@@ -134,10 +137,13 @@ def referral_add(request):
         obj.reward_given = reward_given
         obj.notes = notes
         obj.save()
-        return _render_referrals_list(request, hub_id)
-    return django_render(request, 'referrals/partials/panel_referral_add.html', {})
+        response = HttpResponse(status=204)
+        response['HX-Redirect'] = reverse('referrals:referrals_list')
+        return response
+    return {}
 
 @login_required
+@htmx_view('referrals/pages/referral_edit.html', 'referrals/partials/referral_edit_content.html')
 def referral_edit(request, pk):
     hub_id = request.session.get('hub_id')
     obj = get_object_or_404(Referral, pk=pk, hub_id=hub_id, is_deleted=False)
@@ -152,7 +158,7 @@ def referral_edit(request, pk):
         obj.notes = request.POST.get('notes', '').strip()
         obj.save()
         return _render_referrals_list(request, hub_id)
-    return django_render(request, 'referrals/partials/panel_referral_edit.html', {'obj': obj})
+    return {'obj': obj}
 
 @login_required
 @require_POST
